@@ -1,0 +1,38 @@
+<header class='row'>
+  <div class='span5 col-sm-5'>
+    <h3><%=t 'Qlimits' %></h3>
+  </div>
+</header>
+
+<table class="table table-hover table-bordered table-striped table-white">
+  <thead>
+    <tr>
+      <th>Queue</th>
+      <th style="text-align:center;">Current Running</th>
+      <th style="text-align:center;">Limit</th>
+      <th style="text-align:center;">Zero</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% Sidekiq::Qlimit::QlimitFetch.qlimit_hash.each do |k,v| %>
+      <tr>
+        <td style="vertical-align:middle;text-align:center;">
+          <%= k %>
+        </td>
+        <td style="vertical-align:middle;text-align:center;">
+          <%= v %>
+        </td>
+        <td style="vertical-align:middle;text-align:center;">
+          -Later-
+        </td>
+        <td style="vertical-align:middle;text-align:center;">
+          <form action="<%= root_path %>qlimit/<%= k %>" method="POST">
+            <%= csrf_tag %>
+            <input type="hidden" name="_method" value="delete" />
+            <button class="btn btn-danger" type="submit">Reset</button>
+          </form>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

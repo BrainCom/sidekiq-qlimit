@@ -1,0 +1,9 @@
+---
+:concurrency: 5
+:pidfile: tmp/pids/sidekiq.pid
+:queues:
+  - unlimited
+  - limited
+:qlimit:
+  - limited: 2
+  - fake: 3
