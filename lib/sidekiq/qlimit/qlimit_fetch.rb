@@ -188,7 +188,7 @@ module Sidekiq
       def self.qlimit_hash
         qlimits = {}
         Sidekiq.redis do |conn|
-          conn.scan_each(match: "qlimit:*") do |key|
+          conn.keys("qlimit:*").each do |key|
             qkey = key.sub(/.*qlimit:/, ''.freeze)
             qvalue = conn.get(key)
             qvalue ||= 0
