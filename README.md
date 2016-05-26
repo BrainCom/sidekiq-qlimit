@@ -9,12 +9,22 @@ If using Rails 5
 ```
 gem 'sinatra', :require => nil, github: 'sinatra/sinatra', branch: 'master'
 gem 'sidekiq'
-gem 'sidekiq-qlimit', github: 'BrainCom/sidekiq-qlimit', branch: 'master'
 ```
 
 If using Rails 4
 ```
 gem 'sidekiq'
+```
+
+If you want to be safe
+```
+gem 'sidekiq-qlimit', '~> 0'
+```
+
+Bleeding Edge
+-------------------
+If you want to ride on the edge of what we're doing
+```
 gem 'sidekiq-qlimit', github: 'BrainCom/sidekiq-qlimit', branch: 'master'
 ```
 

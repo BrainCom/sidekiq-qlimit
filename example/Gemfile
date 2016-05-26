@@ -48,4 +48,4 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem 'pry-byebug'
 gem 'sinatra', :require => nil, github: 'sinatra/sinatra', branch: 'master'
 gem 'sidekiq'
-gem 'sidekiq-qlimit', github: 'BrainCom/sidekiq-qlimit', branch: 'master'
+gem 'sidekiq-qlimit', '~> 0'

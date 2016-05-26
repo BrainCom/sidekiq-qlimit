@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["jeff@braincommerce.com"]
 
   spec.summary       = "Sidekiq per queue 'soft' limiting."
-  spec.description   = "Sidekiq per queue 'soft' limiting."
+  spec.description   = "Sidekiq per queue 'soft' limiting. It ain't perfect, but it's enough."
   spec.homepage      = "https://github.com/braincom/sidekiq-qlimit"
   spec.license       = "MIT"
 
@@ -25,7 +25,8 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "sidekiq"
+  spec.add_runtime_dependency 'sidekiq', '~> 4.0'
+
 
   spec.add_development_dependency "bundler", "~> 1.10"
 

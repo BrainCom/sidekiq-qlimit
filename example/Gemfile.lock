@@ -1,12 +1,4 @@
 GIT
-  remote: git://github.com/BrainCom/sidekiq-qlimit.git
-  revision: 08f87b320fcdabda2e1294986087c100c6ccdedb
-  branch: master
-  specs:
-    sidekiq-qlimit (0.0.1)
-      sidekiq
-
-GIT
   remote: git://github.com/sinatra/sinatra.git
   revision: 5e9e23621c1f6abbd793b46452cb11ae8ca1277e
   branch: master
@@ -153,6 +145,8 @@ GEM
       concurrent-ruby (~> 1.0)
       connection_pool (~> 2.2, >= 2.2.0)
       redis (~> 3.2, >= 3.2.1)
+    sidekiq-qlimit (0.0.2)
+      sidekiq (~> 4.0)
     slop (3.6.0)
     spring (1.7.1)
     sprockets (3.6.0)
@@ -195,7 +189,7 @@ DEPENDENCIES
   redis (~> 3.0)
   sass-rails (~> 5.0)
   sidekiq
-  sidekiq-qlimit!
+  sidekiq-qlimit (~> 0)
   sinatra!
   spring
   sqlite3
