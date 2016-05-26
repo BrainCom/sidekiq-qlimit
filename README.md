@@ -3,20 +3,18 @@ Per Queue Limit for Sidekiq
 
 Add to your Gemfile
 -------------------
-Note: We're not yet released, so we're simply tracking the master branch for now.  
-
-If using Rails 5
+If using Rails 5 - Use sinatra master branch
 ```
 gem 'sinatra', :require => nil, github: 'sinatra/sinatra', branch: 'master'
 gem 'sidekiq'
 ```
 
-If using Rails 4
+If using Rails 4 - Make sure you at least have sidekiq
 ```
 gem 'sidekiq'
 ```
 
-If you want to be safe
+Of course, add sidekiq-qlimit
 ```
 gem 'sidekiq-qlimit', '~> 0'
 ```
