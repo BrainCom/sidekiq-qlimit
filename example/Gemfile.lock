@@ -145,8 +145,10 @@ GEM
       concurrent-ruby (~> 1.0)
       connection_pool (~> 2.2, >= 2.2.0)
       redis (~> 3.2, >= 3.2.1)
-    sidekiq-qlimit (0.0.2)
+    sidekiq-qlimit (0.0.4)
       sidekiq (~> 4.0)
+      sinatra (>= 1.4.7)
+      tilt (~> 2.0)
     slop (3.6.0)
     spring (1.7.1)
     sprockets (3.6.0)
@@ -189,7 +191,7 @@ DEPENDENCIES
   redis (~> 3.0)
   sass-rails (~> 5.0)
   sidekiq
-  sidekiq-qlimit (~> 0)
+  sidekiq-qlimit (~> 0.0.3)
   sinatra!
   spring
   sqlite3
