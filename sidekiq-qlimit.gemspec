@@ -17,8 +17,8 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/braincom/sidekiq-qlimit"
   spec.license       = "MIT"
 
-  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
-    f.match %r{^(test|spec|features)/}
+  spec.files         = `git ls-files -z lib`.split("\x0").reject do |f|
+    f.match %r{^(test|spec|features|example)/}
   end
 
   spec.bindir        = "exe"
@@ -28,4 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "sidekiq"
 
   spec.add_development_dependency "bundler", "~> 1.10"
+
+  spec.rdoc_options << '--title' << 'Sidekiq-Qlimit - A Soft Limiter' << '--main' << 'README.md' << '--exclude' << "example"
 end

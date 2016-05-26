@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/BrainCom/sidekiq-qlimit.git
-  revision: 30db9876d6854ffdf5469e2b3e5729e3a670a7fc
+  revision: 08f87b320fcdabda2e1294986087c100c6ccdedb
   branch: master
   specs:
     sidekiq-qlimit (0.0.1)

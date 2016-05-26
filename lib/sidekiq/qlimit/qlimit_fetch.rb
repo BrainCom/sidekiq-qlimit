@@ -6,6 +6,7 @@ require "sidekiq/fetch"
 
 module Sidekiq
   module Qlimit
+    ##
     # Throttled version of `Sidekiq::QlimitFetch` fetcher strategy.
     #
     #
@@ -17,15 +18,25 @@ module Sidekiq
     # Establish max # of total workers per queue 
     #
     # sidekiq.yml 
+    # --
     #
-    # :qlimit:
-    #   queue_name_1: 2
-    #   queue_name_2: 4
+    #   :qlimit:
+    #     queue_name_1: 2
+    #     queue_name_2: 4
     #
+    #--
+    # TODO: Store current limits in redis and read from redis to display
+    #++
     class QlimitFetch < ::Sidekiq::BasicFetch
+    
+      # Redis Script SHA tracking
+      @@qlimit_increment_sha = ""
+      @@qlimit_decrement_sha = ""
+
+      # Qlimit aware UnitOfWork
       UnitOfWork = Struct.new(:queue, :job) do
         def acknowledge
-          # nothing to do
+          # Reduce qlimit on acknowledge
           QlimitFetch.qlimit_decrement(queue_name)
         end
 
@@ -40,6 +51,8 @@ module Sidekiq
         end
       end
 
+      ## 
+      # Modified Initialize Function - Reads :qlimit from config source such as sidekiq.yml
       def initialize(options)
         super(options)
         
@@ -56,6 +69,9 @@ module Sidekiq
             end
           end
         end
+
+        # TODO: Store current limits in redis and read from redis to display
+
         QlimitFetch.qlimit_script_load
       end
 
@@ -63,6 +79,8 @@ module Sidekiq
 
 
 
+      ## 
+      # Returns an array of queue names that are NOT too busy
       def qualifying_queues
         # Working copy of @queues list
         allowed_queues = @queues.dup
@@ -94,6 +112,8 @@ module Sidekiq
       end
 
 
+      ## 
+      # Returns a "UnitOfWork" from a qualifying queue if available
       def retrieve_work 
         work_text = Sidekiq.redis { |conn| conn.brpop(*qualifying_queues) }
         work = UnitOfWork.new(*work_text) if work_text
@@ -117,10 +137,13 @@ module Sidekiq
         end
       end
 
-      @@qlimit_increment_sha = ""
-      @@qlimit_decrement_sha = ""
 
+      ## 
+      # Returns a "UnitOfWork" from a qualifying queue if available
       def self.qlimit_script_load
+        # Note:
+        # This is not theadsafe.  Instead we *blindly* increment if current < max. 
+        # We assume there is little or no penalty for running a few too many workers
         qlimit_increment_script = <<-EOF
             local max = tonumber(ARGV[1])
             local current = tonumber(redis.call('get',KEYS[1]))
@@ -139,6 +162,10 @@ module Sidekiq
                 return false
             end
         EOF
+
+        # Note: 
+        # If we zero a counter or reduce a limit, we could go "negative" on a decrement.  
+        # Limit minimum at 0 which is self correcting.
         qlimit_decrement_script = <<-EOF
             redis.call('decrby', KEYS[1], ARGV[1])
             local current = tonumber(redis.call('get',KEYS[1]))
@@ -154,6 +181,10 @@ module Sidekiq
         end
       end
 
+      ## 
+      # Returns a hash of current count of running jobs in queues
+      # 
+      #   Example: { "queue1": 123, "queue2": 456 }
       def self.qlimit_hash
         qlimits = {}
         Sidekiq.redis do |conn|
@@ -167,11 +198,13 @@ module Sidekiq
         qlimits
       end
 
-      # return 1 if okay to continue
-      # return 0 if maxed
+      ## 
+      # Increment current count of running jobs in queue by amount NOT to exceed limit
+      #
+      # return 1 if incrementing count would NOT exceed limit
+      # return 0 if incrementing count would exceed limit
       def self.qlimit_increment(queue, limit)
         return 1 if limit.nil?  # No limit, no processing
-
 
         Sidekiq.redis do |conn|
           result = conn.evalsha(@@qlimit_increment_sha,["qlimit:#{queue}"],[limit])
@@ -180,6 +213,8 @@ module Sidekiq
         end
       end
 
+      ## 
+      # Decrement current count of running jobs in queue by amount (default: 1)
       def self.qlimit_decrement(queue, amount = 1)
         Sidekiq.logger.debug("Qlimit Decrement: #{queue} by #{amount}")
 
@@ -188,11 +223,14 @@ module Sidekiq
         end
       end
 
+      ## 
+      # Set current count of running jobs in queue to 0
       def self.qlimit_reset(queue)
           self.qlimit_set(queue, 0)
       end
 
-      # Mainly used for reset
+      ## 
+      # Set current count of running jobs in queue
       def self.qlimit_set(queue, amount = 0)
         Sidekiq.logger.debug("Qlimit Set: #{queue} => #{amount}")
         Sidekiq.redis do |conn|
@@ -201,6 +239,8 @@ module Sidekiq
         end
       end
 
+      ## 
+      # Get current count of running jobs from queue
       def self.qlimit_get(queue)
         Sidekiq.redis do |conn|
           result = conn.get("qlimit:#{queue}")
@@ -209,8 +249,8 @@ module Sidekiq
         end
       end
 
-      # By leaving this as a class method, it can be pluggable and used by the Manager actor. Making it
-      # an instance method will make it async to the Fetcher actor
+      ## 
+      # Used to requeue jobs on sidekiq shutdown/termination
       def self.bulk_requeue(inprogress, options)
         return if inprogress.empty?
 
@@ -225,6 +265,7 @@ module Sidekiq
           conn.pipelined do
             jobs_to_requeue.each do |queue, jobs|
               conn.rpush("queue:#{queue}", jobs)
+              # Reduce qlimit on requeue of amount: jobs.length
               self.qlimit_decrement(queue, jobs.length)
             end
           end
