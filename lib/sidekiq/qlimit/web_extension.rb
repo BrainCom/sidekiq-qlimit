@@ -1,4 +1,4 @@
-require 'tilt/erubis'
+require 'tilt'
 
 module Sidekiq
   module Qlimit
